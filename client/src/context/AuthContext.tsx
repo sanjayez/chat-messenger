@@ -9,19 +9,15 @@ import {
 } from "react";
 import { useNavigate } from "react-router-dom";
 import { StreamChat } from "stream-chat";
+import { useLocalStorage } from "../hooks/useLocalStorage";
 
 type AuthContext = {
   user?: User;
   streamChat?: StreamChat;
   signup: UseMutationResult<AxiosResponse, unknown, User>;
   login: UseMutationResult<{ token: string; user: User }, unknown, string>;
+  logout: UseMutationResult<AxiosResponse, unknown, void>;
 };
-
-const Context = createContext<AuthContext | null>(null);
-
-export function useAuth() {
-  return useContext(Context) as AuthContext;
-}
 
 type AuthProviderProps = {
   children: ReactNode;
@@ -33,10 +29,21 @@ type User = {
   image?: string;
 };
 
+const Context = createContext<AuthContext | null>(null);
+
+export function useAuth() {
+  return useContext(Context) as AuthContext;
+}
+
+export function useLoggedInAuth() {
+  return useContext(Context) as AuthContext &
+    Required<Pick<AuthContext, "user">>;
+}
+
 export function AuthProvider({ children }: AuthProviderProps) {
   const navigate = useNavigate();
-  const [user, setUser] = useState<User>();
-  const [token, setToken] = useState<string>();
+  const [user, setUser] = useLocalStorage<User>("user");
+  const [token, setToken] = useLocalStorage<string>("token");
   const [streamChat, setStreamChat] = useState<StreamChat>();
 
   const signup = useMutation({
@@ -59,6 +66,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
     onSuccess(data) {
       setUser(data.user);
       setToken(data.token);
+    },
+  });
+
+  const logout = useMutation({
+    mutationFn: () => {
+      return axios.post(`${import.meta.env.VITE_SERVER_URL}/logout`, { token });
+    },
+    onSuccess() {
+      setUser(undefined);
+      setToken(undefined);
+      setStreamChat(undefined);
     },
   });
 
@@ -86,7 +104,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, [token, user]);
 
   return (
-    <Context.Provider value={{ signup, login, user, streamChat }}>
+    <Context.Provider value={{ signup, login, user, streamChat, logout }}>
       {children}
     </Context.Provider>
   );
