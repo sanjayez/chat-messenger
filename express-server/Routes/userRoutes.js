@@ -4,3 +4,5 @@ const router = express.Router()
 router.post('/', (req, res) => {
     res.send('post working')
 })
+
+module.exports = router
