@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
-const StreamChat = require("stream-chat");
+const StreamChat = require('stream-chat').StreamChat;
 
 const streamChat = StreamChat.getInstance(
   process.env.STREAM_API_KEY,
