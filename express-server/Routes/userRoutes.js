@@ -1,11 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
-router.post("/", (req, res) => {
-  res.send("post working");
-});
-
-import { StreamChat } from "stream-chat";
+const StreamChat = require("stream-chat");
 
 const streamChat = StreamChat.getInstance(
   process.env.STREAM_API_KEY,
