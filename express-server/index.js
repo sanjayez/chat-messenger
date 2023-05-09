@@ -4,6 +4,9 @@ const express = require("express");
 const cors = require("cors");
 
 const app = express();
+app.use(cors());
+app.use(express.json());
+
 const StreamChat = require("stream-chat").StreamChat;
 const streamChat = StreamChat.getInstance(
   process.env.STREAM_API_KEY,
@@ -11,8 +14,6 @@ const streamChat = StreamChat.getInstance(
 );
 
 const TOKEN_USER_ID_MAP = new Map();
-
-app.use(cors());
 
 app.post("/signup", async (req, res) => {
   const { id, name, image } = req.body;
